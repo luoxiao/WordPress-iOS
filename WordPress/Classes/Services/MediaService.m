@@ -334,8 +334,6 @@
             success:(nullable void (^)(void))success
             failure:(nullable void (^)(NSError * _Nonnull error))failure
 {
-    id<MediaServiceRemote> remote = [self remoteForBlog:media.blog];
-    RemoteMedia *remoteMedia = [self remoteMediaFromMedia:media];
     NSManagedObjectID *mediaObjectID = media.objectID;
 
     void (^successBlock)(void) = ^() {
@@ -350,6 +348,14 @@
                                      }];
         }];
     };
+
+    if (media.remoteStatus != MediaRemoteStatusSync) {
+        successBlock();
+        return;
+    }
+
+    id<MediaServiceRemote> remote = [self remoteForBlog:media.blog];
+    RemoteMedia *remoteMedia = [self remoteMediaFromMedia:media];
     
     [remote deleteMedia:remoteMedia
                 success:successBlock
